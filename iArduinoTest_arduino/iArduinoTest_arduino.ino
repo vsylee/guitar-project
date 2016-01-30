@@ -13,10 +13,13 @@ int notes[4][7] = { {NOTE_GS4, NOTE_A4, NOTE_AS4, NOTE_B4, NOTE_C4, NOTE_CS4, NO
 
   char inChar = -1; // where to store the character read
   char inData[4][6];
+  boolean openString[4];
+  boolean laserBroken[4];
   byte index = 0; 
 
 // note durations: 4 = quarter note, 8 = eighth note, etc.:
 int noteDurations[] = {4, 8};
+int noteDuration = 100;
 
 char message = -1; 
 int speaker = 9; 
@@ -37,66 +40,54 @@ void loop() {
       int string = count/6;
       int fret = count%6;
       inData[string][fret] = inChar;
-      output += inChar;
       count++;
+    }
+    for (int string = 0; string < 4; string++) {
+      openString[string] = isStringOpen(string);
     }
     count = 0;
     // play notes here based on inData
+    // TODO: only play notes when laser is broken
+    playNotes();
   } else {
-    delay(1000);
+    delay(100);
     noTone(speaker);
   }
 }
 
-//int buttonPressed(int row) { 
-//  
-//  while (Serial.available() > 0) {
-//
-//    if (index < 6) {
-//      inChar = Serial.read(); 
-//      inData[index] = inChar; 
-//      index++; 
-////      inData[index] = '\0'; 
-//    } 
-//    
-//    else if (index == 6) {
-//      boolean butPressed = false; 
-//      for (int i = 0; i<6; i++) {
-//        if (inData[i] == '1') {
-//          Serial.println(i); 
-//          butPressed = true; 
-//          for (int i = 0; i<6; i++) {
-//            inData[i] = 0; 
-//          }
-//          index = 0; 
-//          return notes[row-1][i]; 
-//        }
-//      }
-//      //if (butPressed == false) {
-//      for (int i = 0; i<6; i++) {
-//        inData[i] = 0; 
-//      }
-//      index = 0; 
-//      return notes[row-1][6]; 
-//      //}
-//    }
-////    Serial.println(inData[0]=='1'); 
-//    
-//    return -1; 
-//    
-////    for (byte i = 0; i < 6; i++) {
-////      inChar = Serial.read(); 
-////      if (inChar == '1') {
-////        Serial.println(i); 
-////        butPressed = true;
-////        return notes[row-1][i];
-////      }
-////    }
-////    if (butPressed == false) {
-////      return notes[row-1][6]; // return the default note
-////    }
-//  }
-//}
+//tone(speaker, notePlaying, durationOfNote)
+void playNotes() {
+  for (int string = 0; string < 4; string++) {
+    if (openString[string] == true) {
+      tone(speaker, notes[string][6], noteDuration);
+    } else {
+      //play the note of the lowest fret pressed, i.e. highest index in the row
+      int fret = lowestFretPressed(string);
+      tone(speaker, notes[string][fret], noteDuration);
+    }
+    delay(100);
+    noTone(speaker);
+  }
+}
+
+// precondition: assumes string is not open
+int lowestFretPressed(int string) {
+  for (int fret = 5; fret >= 0; fret--) {
+    if (inData[string][fret] == '1') {
+      return fret;
+    }
+  }
+  return -1;
+}
+
+boolean isStringOpen(int string) {
+  for (int fret = 0; fret < 6; fret++) {
+    if (inData[string][fret] == '1') {
+      return false;
+    }
+  }
+  return true;
+}
 
 //boolean laserBroken(int sensorNum) {
 ////  return analogRead(sensorNum < threshold); 
