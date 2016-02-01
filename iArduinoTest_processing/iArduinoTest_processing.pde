@@ -18,7 +18,7 @@ void setup() {
   size(200,100);        // Processing screen size
   noStroke();            //  We don’t want an outline or Stroke on our graphics
   oscP5 = new OscP5(this,8000);  // Start oscP5, listening for incoming messages at port 8000
-  arduinoPort = new Serial(this, Serial.list()[2], 9600);    // Set arduino to 9600 baud
+  arduinoPort = new Serial(this, Serial.list()[2], 250000);    // Set arduino to 9600 baud
 }
 
 void oscEvent(OscMessage theOscMessage) {   //  This runs whenever there is a new OSC message

@@ -1,6 +1,6 @@
 #include "pitches.h"
 
-int sensors[4] = {A15, A14, A13, A12};
+int sensors[4] = {A5, A4, A3, A2};
 int notes[4][7] = { {NOTE_GS4, NOTE_A4, NOTE_AS4, NOTE_B4, NOTE_C4, NOTE_CS4, NOTE_G4},
 {NOTE_CS4, NOTE_D4, NOTE_DS4, NOTE_E4, NOTE_F4, NOTE_FS4, NOTE_C4},
 {NOTE_F4, NOTE_FS4, NOTE_G4, NOTE_GS4, NOTE_A4, NOTE_AS4, NOTE_E4},
@@ -20,10 +20,11 @@ void setup() {
   for (int string = 0; string < 4; string++) {
     pinMode(sensors[string], INPUT);
   }
-  Serial.begin(9600);
+  Serial.begin(250000);
 }
 
 void loop() {
+//  if (stringPlayed[0] || stringPlayed[1] || stringPlayed[2] || stringPlayed[3]) {
   if (Serial.available() > 0) {
     //determines which frets are pressed
     int count = 0;
@@ -47,9 +48,11 @@ void loop() {
     // play notes here based on inData and stringPlayed
     playNotes();
   } else {
-    delay(50);
-    //noTone(speaker);
+    //delay(50);
+    if (!playingNote())
+      noTone(speaker);
   }
+//  }
 }
 
 //tone(speaker, notePlaying, durationOfNote)
@@ -93,4 +96,8 @@ boolean isStringOpen(int string) {
 // returns true if there is no light, beam is broken
 boolean laserBroken(int sensorNum) {
   return analogRead(sensorNum) < threshold;
+}
+
+boolean playingNote() {
+  return (stringPlayed[0] || stringPlayed[1] || stringPlayed[2] || stringPlayed[3]);
 }
